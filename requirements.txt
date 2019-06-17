@@ -1,0 +1,6 @@
+flask
+pyota
+flask_restplus
+requests[security]
+validators
+wtforms
