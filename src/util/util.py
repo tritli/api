@@ -10,7 +10,7 @@ from config import PASSPHRASE
 def get_random_id():
     size = 6
     chars = string.ascii_letters + string.digits
-    return ''.join(random.choice(chars) for _ in range(size))
+    return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
 def hash_message(string_to_hash: str):
