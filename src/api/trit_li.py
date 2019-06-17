@@ -9,10 +9,11 @@ from functools import wraps
 
 app = Flask(__name__)
 api = Api(app=app)
+
 limiter = Limiter(
     app,
-    key_func=get_remote_address,
-    default_limits=["100 per day", "10 per hour", "1 per minute"]
+    key_func=get_remote_address
+    # default_limits=["100 per day", "10 per hour", "1 per minute"]
 )
 
 lfs = api.namespace('lfs', description='Get long URL from short URL')
@@ -106,10 +107,3 @@ class ShortURL(Resource):
         message = url_manager.publish_url(url=url)
 
         return message, 200
-
-
-if __name__ == '__main__':
-    api.add_namespace(lfs)
-    api.add_namespace(sfl)
-    api.add_namespace(val)
-    app.run(debug=True)

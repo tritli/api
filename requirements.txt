@@ -1,6 +1,7 @@
 flask
-pyota
+flask_limiter
 flask_restplus
+pyota
 requests[security]
 validators
 wtforms
