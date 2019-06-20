@@ -24,8 +24,15 @@ long_url_body = api.model(
     'Long URL',
     {
         'long_url': fields.String(required=True, description='Long URL', example="http://www.example.org/"),
-        'type': fields.List(fields.String(required=True, description='Choose a url type', example="url", enum=['url', 'iota'])),
+        'type': fields.List(fields.String(required=True, description='Choose a url type', example="url", enum=['url', 'iota', 'document'])),
         'metadata': fields.String(required=False, description='Attach description (max. length 160 characters)', example="trit.li example")
+    }
+)
+
+short_url_body = api.model(
+    'Short URL',
+    {
+        'short_url': fields.String(required=True, description='Short URL', example="http://trit.li/PcYR52")
     }
 )
 
@@ -57,17 +64,22 @@ def redirect_short_url(short_url):
     return redirect(long_url)
 
 
-@lfs.route('/<short_url>')
+@lfs.route('/', methods=['POST'])
 class ShortURL(Resource):
 
-    @api.response(200, 'Long URL found')
-    def get(self, short_url):
+    @api.expect(short_url_body, validate=True)
+    @api.response(200, 'Short URL found')
+    def post(self):
+        body = request.get_json()
+
+        short_url = body["short_url"]
+
         url_manager = UrlManager(NodeManager())
-        message = url_manager.get_url(short_url="/" + short_url)
+        message = url_manager.get_url(short_url=short_url)
         return message, 200
 
 
-@val.route('/')
+@val.route('/', methods=['POST'])
 class ValidateShortURL(Resource):
 
     @api.expect(validation_body, validate=True)
@@ -81,7 +93,14 @@ class ValidateShortURL(Resource):
 
         url_manager = UrlManager(NodeManager())
         valid = url_manager.validate_url(short_url="/" + short_url, long_url=long_url)
-        return valid, 200
+
+        message = {
+            'short_url': short_url,
+            'long_url': long_url,
+            'valid': valid
+        }
+
+        return message, 200
 
 
 @sfl.route('/', methods=['POST'])

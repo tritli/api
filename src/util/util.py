@@ -7,6 +7,7 @@ import base64
 from config import PASSPHRASE
 
 
+# careful here: changes made here, will not be backwards compatible
 def get_random_id():
     size = 6
     chars = string.ascii_letters + string.digits

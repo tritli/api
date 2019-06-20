@@ -27,6 +27,9 @@ class UrlManager(object):
 
         url_transactions = self.__node_manager.retrieve_transactions(tag=url.tag)
 
+        if not url_transactions:
+            return False
+
         for url_transaction in url_transactions:
             if url_transaction.message["long_url"] == long_url:
                 if validate_message(url_transaction.message):
@@ -49,7 +52,7 @@ class UrlManager(object):
         return False
 
     def get_url(self, short_url: str):
-        random_id = short_url.split("/")[-1]
+        random_id = short_url.strip('/').split("/")[-1]
 
         url = Url(long_url=None, metadata=None)
         url.random_id = random_id
