@@ -3,4 +3,5 @@ NODES = ["https://lewandroch.ddns.net", "https://nodes.thetangle.org:443"]
 
 DOMAIN = "{}{}".format("http://", "trit.li/")
 PASSPHRASE = "TRITLI"
-ADDRESS = "TRITLI9URL9WALLETADDRESS999999999999999999999999999999999999999999999999999999999999999999"
+TAG = "TRITLI"
+ADDRESS_VERSION = "T"  # T = test, A = alpha

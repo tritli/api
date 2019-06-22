@@ -1,11 +1,9 @@
-from nodes import NodeManager
+from functools import wraps
 from flask import Flask, request, redirect, abort
 from flask_restplus import Api, Resource, fields
+from url import UrlManager, Url, IotaUrl, DocumentUrl
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-
-from url import UrlManager, Url, IotaUrl
-from functools import wraps
 
 app = Flask(__name__)
 api = Api(app=app)
@@ -19,11 +17,14 @@ limiter = Limiter(
 lfs = api.namespace('lfs', description='Get long URL from short URL')
 sfl = api.namespace('sfl', description='Get short URL from long URL')
 val = api.namespace('val', description='Validate your short URL')
+exp = api.namespace('exp', description='Explore last posted URLs')
+
 
 long_url_body = api.model(
     'Long URL',
     {
         'long_url': fields.String(required=True, description='Long URL', example="http://www.example.org/"),
+        'tag': fields.String(required=False, description='Enter a tag (allowed: [a-zA-Z9])', example="TRITLI999999999999999999999"),
         'type': fields.List(fields.String(required=True, description='Choose a url type', example="url", enum=['url', 'iota', 'document'])),
         'metadata': fields.String(required=False, description='Attach description (max. length 160 characters)', example="trit.li example")
     }
@@ -44,6 +45,14 @@ validation_body = api.model(
     }
 )
 
+explore_body = api.model(
+    'Last URLs',
+    {
+        'tag': fields.String(required=False, description='Find tag', example="TRITLI999999999999999999999"),
+        'number': fields.Integer(required=False, description='Number of last URLs', example=5)
+    }
+)
+
 
 def limit_content_length(max_length):
     def decorator(f):
@@ -59,7 +68,7 @@ def limit_content_length(max_length):
 
 @app.route('/<short_url>')
 def redirect_short_url(short_url):
-    url_manager = UrlManager(NodeManager())
+    url_manager = UrlManager()
     long_url = url_manager.get_long_url(short_url="/" + short_url)
     return redirect(long_url)
 
@@ -74,8 +83,8 @@ class ShortURL(Resource):
 
         short_url = body["short_url"]
 
-        url_manager = UrlManager(NodeManager())
-        message = url_manager.get_url(short_url=short_url)
+        url_manager = UrlManager()
+        message = url_manager.get_url(short_url=short_url).json
         return message, 200
 
 
@@ -91,7 +100,7 @@ class ValidateShortURL(Resource):
         short_url = body["short_url"]
         long_url = body["long_url"]
 
-        url_manager = UrlManager(NodeManager())
+        url_manager = UrlManager()
         valid = url_manager.validate_url(short_url="/" + short_url, long_url=long_url)
 
         message = {
@@ -114,15 +123,35 @@ class ShortURL(Resource):
         body = request.get_json()
 
         long_url = body["long_url"]
+        tag = body["tag"] if "tag" in body else None
         metadata = body["metadata"] if "metadata" in body else None
         url_type = body["type"][0]
 
         if url_type == 'iota':
-            url = IotaUrl(address=long_url, metadata=metadata)
+            url = IotaUrl(address=long_url, tag=tag, metadata=metadata)
+        elif url_type == 'document':
+            url = DocumentUrl(document_hash=long_url, tag=tag, metadata=metadata)
         else:
-            url = Url(long_url=long_url, metadata=metadata)
+            url = Url(long_url=long_url, tag=tag, metadata=metadata)
 
-        url_manager = UrlManager(NodeManager())
-        message = url_manager.publish_url(url=url)
+        url_manager = UrlManager()
+        message = url_manager.publish_url(url=url).json
+
+        return message, 200
+
+
+@exp.route('/', methods=['POST'])
+class ExploreURL(Resource):
+
+    @api.expect(explore_body, validate=True)
+    @api.response(200, 'Last # URLs loaded')
+    def post(self):
+        body = request.get_json()
+
+        tag = body["tag"] if "tag" in body else None
+        number = body["number"] if "number" in body else 5
+
+        url_manager = UrlManager()
+        message = url_manager.last_urls(tag=tag, number=number)
 
         return message, 200

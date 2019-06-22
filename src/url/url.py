@@ -1,33 +1,26 @@
 import validators
-from validators.utils import ValidationFailure
+
+from url.url_types import URL
+from exceptions import URLException
 from url.abstract_url import AbstractUrl
+from validators.utils import ValidationFailure
 
 
 class Url(AbstractUrl):
 
-	TYPE = "url"
+	TYPE = URL
 
-	def __init__(self, long_url: str = None, metadata: str = None):
+	def __init__(self, long_url: str = None, tag: str = None, metadata: str = None):
 		# todo: check for null or not?!
 		try:
 			if long_url:
 				validators.url(long_url)
 		except ValidationFailure as vf:
-			raise vf
+			raise URLException(vf, URLException.INVALID_URL_FORMAT)
 
-		super(Url, self).__init__(long_url, metadata)
-
-	@property
-	def long_url(self):
-		return self._long_url
+		super(Url, self).__init__(long_url, tag, metadata)
 
 	@property
 	def type(self):
-		return self.TYPE
-
-	@property
-	def metadata(self):
-		if self._metadata is None:
-			self._metadata = ""
-
-		return self._metadata
+		self._type = self.TYPE
+		return self._type

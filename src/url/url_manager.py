@@ -1,22 +1,27 @@
-from url import Url
-from util import validate_message
-from url.abstract_url import AbstractUrl
+from url import Url, UrlAddress
+from nodes import NodeManager
+from config import ADDRESS_VERSION
 
 
 class UrlManager(object):
 
-    def __init__(self, node_manager):
-        self.__node_manager = node_manager
-        self.__node = node_manager.node
+    def __init__(self):
+        self.__node_manager = None
 
-    def publish_url(self, url: AbstractUrl):
+    @property
+    def node_manager(self):
+        if not self.__node_manager:
+            self.__node_manager = NodeManager()
+
+        return self.__node_manager
+
+    def publish_url(self, url):
 
         while self.short_url_exists(url.short_url):
             # could be more self explanatory to create a new short url
             url.random_id = None
 
-        url_transaction = UrlTransaction(tag=url.tag, message=url.message)
-        self.__node_manager.send_transaction(url_transaction)
+        self.node_manager.send_transaction(url)
         return url.message
 
     def validate_url(self, short_url: str, long_url: str):
@@ -25,14 +30,14 @@ class UrlManager(object):
         url = Url()
         url.random_id = random_id
 
-        url_transactions = self.__node_manager.retrieve_transactions(tag=url.tag)
+        url_transactions = self.node_manager.retrieve_transactions(address=url.address)
 
         if not url_transactions:
             return False
 
-        for url_transaction in url_transactions:
-            if url_transaction.message["long_url"] == long_url:
-                if validate_message(url_transaction.message):
+        for url in url_transactions:
+            if url.long_url == long_url:
+                if url.is_valid:
                     return True
 
         return False
@@ -41,10 +46,9 @@ class UrlManager(object):
         # todo: check the case if there is no backslash
         random_id = short_url.split("/")[-1]
 
-        url = Url(long_url=None, metadata=None)
-        url.random_id = random_id
+        url_address = UrlAddress(version=ADDRESS_VERSION, payload=random_id).address
 
-        transactions = self.__node_manager.retrieve_transactions(tag=url.tag)
+        transactions = self.node_manager.retrieve_transactions(address=url_address)
 
         if transactions:
             return True
@@ -57,16 +61,16 @@ class UrlManager(object):
         url = Url(long_url=None, metadata=None)
         url.random_id = random_id
 
-        url_transactions = self.__node_manager.retrieve_transactions(tag=url.tag)
+        url_transactions = self.node_manager.retrieve_transactions(address=url.address)
 
         if not url_transactions:
             return None
 
         valid_message = None
 
-        for url_transaction in url_transactions:
-            if validate_message(url_transaction.message):
-                valid_message = url_transaction.message
+        for url in url_transactions:
+            if url.is_valid:
+                valid_message = url.message
 
         if not valid_message:
             return None
@@ -74,24 +78,26 @@ class UrlManager(object):
         return valid_message
 
     def get_long_url(self, short_url: str):
-        message = self.get_url(short_url=short_url)
+        message = self.get_url(short_url=short_url).json
 
         if not message:
             return None
 
         return message["long_url"]
 
+    def last_urls(self, tag: str = None, number: int = 5):
+        url_transactions = self.node_manager.last_transactions(tag=tag, number=number)
 
-class UrlTransaction(object):
+        if not url_transactions:
+            return None
 
-    def __init__(self, tag: str, message: dict):
-        self.__tag = tag
-        self.__message = message
+        valid_messages = list()
 
-    @property
-    def tag(self):
-        return self.__tag
+        for url in url_transactions:
+            if url.is_valid:
+                valid_messages.append(url.message.json)
 
-    @property
-    def message(self):
-        return self.__message
+        if not valid_messages or len(valid_messages) == 0:
+            return None
+
+        return valid_messages

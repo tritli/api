@@ -2,10 +2,11 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from requests.exceptions import ConnectionError
 from iota import BadApiResponse, Iota, Address, Tag, ProposedTransaction, TryteString, Transaction
-from url import UrlTransaction
-from config import NODES, ADDRESS
-
-import pprint as pp
+from config import NODES, TAG
+from util import prepare_tag
+from url.url_types import IOTA, DOC
+from url import Url, IotaUrl, DocumentUrl
+from url.url_message import UrlMessage
 import json
 
 
@@ -31,33 +32,41 @@ class NodeManager(object):
                 print('{uri} is good to go'.format(uri=node_uri))
                 return True
 
+        selected_node = None
+
         if self.__node is None:
             for node_uri in NODES:
                 node = Iota(node_uri)
                 if node_is_responsive(node, node_uri):
                     self.__node = node
+                    selected_node = node_uri
                     continue
 
+        print('Selected node: {node}'.format(node=selected_node))
         return self.__node
 
-    def send_transaction(self, url_transaction: UrlTransaction):
-        proposed_transaction = ProposedTransaction(address=Address(ADDRESS),
+    def send_transaction(self, url):
+        proposed_transaction = ProposedTransaction(address=Address(url.address),
                                                    value=self.__value,
-                                                   tag=Tag(url_transaction.tag.encode("utf-8")),
-                                                   message=TryteString.from_unicode(json.dumps(url_transaction.message))
+                                                   tag=Tag(url.tag.encode("utf-8")),
+                                                   message=TryteString.from_unicode(json.dumps(url.message.json))
                                                    )
 
         self.node.send_transfer(depth=self.__depth,
                                 transfers=[proposed_transaction]
                                 )
 
-    def retrieve_transactions(self, tag: str = None):
+    def retrieve_transactions(self, address: str = None, tag: str = None, number: int = None):
+
+        MAX_TRIES = 20
 
         def convert_trytes_to_string(tryte_string):
             transaction_to_decode = Transaction.from_tryte_string(tryte_string)
-            return transaction_to_decode.signature_message_fragment.decode()
+            tag = transaction_to_decode.tag
+            message_string = transaction_to_decode.signature_message_fragment.decode()
+            return tag, UrlMessage(message_string)
 
-        def convert_to_url_transaction(tag, transaction_hashes):
+        def convert_to_url_transaction(transaction_hashes, number: int = None):
             trytes = self.node.get_trytes(transaction_hashes)
 
             if "trytes" not in trytes:
@@ -69,43 +78,55 @@ class NodeManager(object):
                 return None
 
             url_transactions = list()
+            tries = 0
 
             for tryte_string in tryte_strings:
-                message = convert_trytes_to_string(tryte_string)
-                url_transactions.append(UrlTransaction(tag=tag, message=json.loads(message)))
+                try:
+                    tag, message = convert_trytes_to_string(tryte_string)
+
+                    if message.type == IOTA:
+                        url = IotaUrl()
+                    elif message.type == DOC:
+                        url = DocumentUrl()
+                    else:
+                        url = Url()
+
+                    url.from_message(message)
+                    url_transactions.append(url)
+
+                    if (number and len(url_transactions) == number) or tries == MAX_TRIES:
+                        return url_transactions
+
+                except Exception as e:
+                    print(e)
+                    pass
+                tries += 1
 
             return url_transactions
 
-        if tag:
-            transactions = self.node.find_transactions(tags=[Tag(tag)])
+        if address:
+            transactions = self.node.find_transactions(addresses=[Address(address)])
+        elif tag:
+            identifier_tag = prepare_tag(tag).encode("utf-8")
+            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
         else:
-            transactions = self.node.find_transactions(addresses=[Address(ADDRESS)])
+            identifier_tag = prepare_tag(TAG).encode("utf-8")
+            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
 
         if "hashes" not in transactions or len(transactions["hashes"]) == 0:
             return None
 
-        url_transactions = convert_to_url_transaction(tag, transactions["hashes"])
+        url_transactions = convert_to_url_transaction(transactions["hashes"], number)
 
         if not url_transactions:
             return None
 
         return url_transactions
 
-    def last_transactions(self, page: int = 0, page_size: int = 5):
-        start = 0
-        if page and page > 0:
-            start = page_size * (page - 1)
+    def last_transactions(self, tag: str = None, number: int = 5):
+        url_transactions = self.retrieve_transactions(tag=tag, number=number)
 
-        end = start + page_size
+        if not url_transactions:
+            return None
 
-        transactions = self.node.find_transactions(addresses=[Address(ADDRESS)])
-
-        hashes = transactions["hashes"][start:end]
-        pp.pprint(hashes)
-        # trytes = self.__api.get_trytes(hashes)
-
-        # for tryte_string in trytes["trytes"]:
-        #     transaction = Transaction.from_tryte_string(tryte_string)
-        #     message = transaction.signature_message_fragment.decode()
-        #     pp.pprint(json.loads(message))
-
+        return url_transactions
