@@ -1,3 +1,4 @@
+cryptography>=2.3
 flask
 flask_limiter
 flask_restplus

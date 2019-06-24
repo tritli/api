@@ -33,14 +33,14 @@ long_url_body = api.model(
 short_url_body = api.model(
     'Short URL',
     {
-        'short_url': fields.String(required=True, description='Short URL', example="http://trit.li/PcYR52")
+        'short_url': fields.String(required=True, description='Short URL', example="http://trit.li/oSMJG9")
     }
 )
 
 validation_body = api.model(
     'URL Validation',
     {
-        'short_url': fields.String(required=True, description='Short URL', example="http://trit.li/ABCDEF"),
+        'short_url': fields.String(required=True, description='Short URL', example="http://trit.li/oSMJG9"),
         'long_url': fields.String(required=True, description='Long URL', example="http://www.example.org/")
     }
 )
@@ -84,7 +84,15 @@ class ShortURL(Resource):
         short_url = body["short_url"]
 
         url_manager = UrlManager()
-        message = url_manager.get_url(short_url=short_url).json
+        message = url_manager.get_url(short_url=short_url)
+
+        if message:
+            return message.json, 200
+
+        message = {
+            "error": "URL not found"
+        }
+
         return message, 200
 
 
@@ -135,7 +143,14 @@ class ShortURL(Resource):
             url = Url(long_url=long_url, tag=tag, metadata=metadata)
 
         url_manager = UrlManager()
-        message = url_manager.publish_url(url=url).json
+        message = url_manager.publish_url(url=url)
+
+        if message:
+            return message.json, 200
+
+        message = {
+            "error": "URL not found"
+        }
 
         return message, 200
 
@@ -153,5 +168,12 @@ class ExploreURL(Resource):
 
         url_manager = UrlManager()
         message = url_manager.last_urls(tag=tag, number=number)
+
+        if message:
+            return message.json, 200
+
+        message = {
+            "error": "URL not found"
+        }
 
         return message, 200
