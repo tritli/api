@@ -1,6 +1,7 @@
 import json
 from functools import wraps
-from flask import Flask, request, redirect, abort, jsonify, make_response
+from flask import Flask, request, redirect, abort, jsonify
+from exceptions import URLException
 from flask_restplus import Api, Resource, fields
 from url import UrlManager, Url, IotaUrl, DocumentUrl
 from flask_limiter import Limiter
@@ -67,28 +68,20 @@ def limit_content_length(max_length):
     return decorator
 
 
+@app.errorhandler(URLException)
+def handle_url_exception(error):
+    return error.get_response()
+
+
 @app.route('/<short_url>')
 def redirect_short_url(short_url):
-    try:
-        url_manager = UrlManager()
-        long_url = url_manager.get_long_url(short_url="/" + short_url)
-        return redirect(long_url)
-    except Exception as e:
-        message = {
-            "error": str(e)
-        }
-        status = 400
-
-    response = app.response_class(
-        response=json.dumps(message),
-        status=status,
-        mimetype='application/json'
-    )
-
-    return response
+    url_manager = UrlManager()
+    long_url = url_manager.get_long_url(short_url="/" + short_url)
+    return redirect(long_url)
 
 
 @lfs.route('/', methods=['POST'])
+@lfs.errorhandler(URLException)
 class ShortURL(Resource):
 
     @api.expect(short_url_body, validate=True)
@@ -98,16 +91,10 @@ class ShortURL(Resource):
 
         short_url = body["short_url"]
 
-        try:
-            url_manager = UrlManager()
-            message = url_manager.get_url(short_url=short_url)
-            message = message.json
-            status = 200
-        except Exception as e:
-            message = {
-                "error": str(e)
-            }
-            status = 400
+        url_manager = UrlManager()
+        message = url_manager.get_url(short_url=short_url)
+        message = message.json
+        status = 200
 
         response = app.response_class(
             response=json.dumps(message),
@@ -119,6 +106,7 @@ class ShortURL(Resource):
 
 
 @val.route('/', methods=['POST'])
+@val.errorhandler(URLException)
 class ValidateShortURL(Resource):
 
     @api.expect(validation_body, validate=True)
@@ -130,21 +118,15 @@ class ValidateShortURL(Resource):
         short_url = body["short_url"]
         long_url = body["long_url"]
 
-        try:
-            url_manager = UrlManager()
-            valid = url_manager.validate_url(short_url="/" + short_url, long_url=long_url)
+        url_manager = UrlManager()
+        valid = url_manager.validate_url(short_url="/" + short_url, long_url=long_url)
 
-            message = {
-                'short_url': short_url,
-                'long_url': long_url,
-                'valid': valid
-            }
-            status = 200
-        except Exception as e:
-            message = {
-                "error": str(e)
-            }
-            status = 400
+        message = {
+            'short_url': short_url,
+            'long_url': long_url,
+            'valid': valid
+        }
+        status = 200
 
         response = app.response_class(
             response=json.dumps(message),
@@ -156,6 +138,7 @@ class ValidateShortURL(Resource):
 
 
 @sfl.route('/', methods=['POST'])
+@sfl.errorhandler(URLException)
 class ShortURL(Resource):
 
     @api.expect(long_url_body, validate=True)
@@ -177,16 +160,10 @@ class ShortURL(Resource):
         else:
             url = Url(long_url=long_url, tag=tag, metadata=metadata)
 
-        try:
-            url_manager = UrlManager()
-            message = url_manager.publish_url(url=url)
-            message = message.json
-            status = 200
-        except Exception as e:
-            message = {
-                "error": str(e)
-            }
-            status = 400
+        url_manager = UrlManager()
+        message = url_manager.publish_url(url=url)
+        message = message.json
+        status = 200
 
         response = app.response_class(
             response=json.dumps(message),
@@ -198,6 +175,7 @@ class ShortURL(Resource):
 
 
 @exp.route('/', methods=['POST'])
+@exp.errorhandler(URLException)
 class ExploreURL(Resource):
 
     @api.expect(explore_body, validate=True)
@@ -208,15 +186,9 @@ class ExploreURL(Resource):
         tag = body["tag"] if "tag" in body else None
         number = body["number"] if "number" in body else 5
 
-        try:
-            url_manager = UrlManager()
-            message = url_manager.last_urls(tag=tag, number=number)
-            status = 200
-        except Exception as e:
-            message = {
-                "error": str(e)
-            }
-            status = 400
+        url_manager = UrlManager()
+        message = url_manager.last_urls(tag=tag, number=number)
+        status = 200
 
         response = app.response_class(
             response=json.dumps(message),

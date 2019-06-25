@@ -48,9 +48,7 @@ class UrlManager(object):
 
         url_address = UrlAddress(version=ADDRESS_VERSION, payload=random_id).address
 
-        transactions = self.node_manager.retrieve_transactions(address=url_address)
-
-        if transactions:
+        if self.node_manager.transaction_exits(address=url_address):
             return True
 
         return False

@@ -10,6 +10,7 @@ from url import Url, IotaUrl, DocumentUrl
 from url.url_message import UrlMessage
 import json
 
+MAX_LENGTH_SIGNATURE_FRAGMENT = 2187
 
 class NodeManager(object):
     def __init__(self):
@@ -46,10 +47,17 @@ class NodeManager(object):
         return self.__node
 
     def send_transaction(self, url):
-        proposed_transaction = ProposedTransaction(address=Address(url.address),
+        address = Address(url.address)
+        tag = Tag(url.tag.encode("utf-8"))
+        message = TryteString.from_unicode(json.dumps(url.message.json))
+
+        if len(message) > MAX_LENGTH_SIGNATURE_FRAGMENT:
+            raise URLException(URLException.MAX_LENGTH)
+
+        proposed_transaction = ProposedTransaction(address=address,
                                                    value=self.__value,
-                                                   tag=Tag(url.tag.encode("utf-8")),
-                                                   message=TryteString.from_unicode(json.dumps(url.message.json))
+                                                   tag=tag,
+                                                   message=message
                                                    )
 
         self.node.send_transfer(depth=self.__depth,
@@ -70,12 +78,12 @@ class NodeManager(object):
             trytes = self.node.get_trytes(transaction_hashes)
 
             if "trytes" not in trytes:
-                raise URLException(URLException.URL_NOT_FOUND)
+                raise URLException(URLException.CONVERT_ERROR)
 
             tryte_strings = trytes["trytes"]
 
             if len(tryte_strings) == 0:
-                raise URLException(URLException.URL_NOT_FOUND)
+                raise URLException(URLException.CONVERT_ERROR)
 
             url_transactions = list()
             tries = 0
@@ -122,6 +130,21 @@ class NodeManager(object):
             raise URLException(URLException.URL_NOT_FOUND)
 
         return url_transactions
+
+    def transaction_exits(self, address: str = None, tag: str = None):
+        if address:
+            transactions = self.node.find_transactions(addresses=[Address(address)])
+        elif tag:
+            identifier_tag = prepare_tag(tag).encode("utf-8")
+            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
+        else:
+            identifier_tag = prepare_tag(TAG).encode("utf-8")
+            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
+
+        if "hashes" not in transactions or len(transactions["hashes"]) == 0:
+            return False
+
+        return True
 
     def last_transactions(self, tag: str = None, number: int = 5):
         url_transactions = self.retrieve_transactions(tag=tag, number=number)
