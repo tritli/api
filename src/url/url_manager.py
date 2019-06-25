@@ -78,12 +78,13 @@ class UrlManager(object):
         return valid_message
 
     def get_long_url(self, short_url: str):
-        message = self.get_url(short_url=short_url).json
+        message = self.get_url(short_url=short_url)
+
+        if message:
+            return message.json["long_url"], 200
 
         if not message:
             return None
-
-        return message["long_url"]
 
     def last_urls(self, tag: str = None, number: int = 5):
         url_transactions = self.node_manager.last_transactions(tag=tag, number=number)
