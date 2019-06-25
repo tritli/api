@@ -23,7 +23,7 @@ exp = api.namespace('exp', description='Explore last posted URLs')
 long_url_body = api.model(
     'Long URL',
     {
-        'long_url': fields.String(required=True, description='Long URL', example="http://www.example.org/"),
+        'long_url': fields.String(required=True, description='Long URL', example="http://trit.li/"),
         'tag': fields.String(required=False, description='Enter a tag (allowed: [a-zA-Z9])', example="TRITLI999999999999999999999"),
         'type': fields.List(fields.String(required=True, description='Choose a url type', example="url", enum=['url', 'iota', 'document'])),
         'metadata': fields.String(required=False, description='Attach description (max. length 160 characters)', example="trit.li example")
@@ -33,15 +33,15 @@ long_url_body = api.model(
 short_url_body = api.model(
     'Short URL',
     {
-        'short_url': fields.String(required=True, description='Short URL', example="http://trit.li/oSMJG9")
+        'short_url': fields.String(required=True, description='Short URL', example="http://trit.li/1J5Afb")
     }
 )
 
 validation_body = api.model(
     'URL Validation',
     {
-        'short_url': fields.String(required=True, description='Short URL', example="http://trit.li/oSMJG9"),
-        'long_url': fields.String(required=True, description='Long URL', example="http://www.example.org/")
+        'short_url': fields.String(required=True, description='Short URL', example="http://trit.li/1J5Afb"),
+        'long_url': fields.String(required=True, description='Long URL', example="http://trit.li/")
     }
 )
 
