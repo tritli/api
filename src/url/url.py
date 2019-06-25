@@ -16,7 +16,7 @@ class Url(AbstractUrl):
 			if long_url:
 				validators.url(long_url)
 		except ValidationFailure as vf:
-			raise URLException(vf, URLException.INVALID_URL_FORMAT)
+			raise URLException(URLException.INVALID_URL_FORMAT, message=str(vf))
 
 		super(Url, self).__init__(long_url, tag, metadata)
 

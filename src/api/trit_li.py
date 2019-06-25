@@ -1,5 +1,6 @@
+import json
 from functools import wraps
-from flask import Flask, request, redirect, abort
+from flask import Flask, request, redirect, abort, jsonify, make_response
 from flask_restplus import Api, Resource, fields
 from url import UrlManager, Url, IotaUrl, DocumentUrl
 from flask_limiter import Limiter
@@ -68,17 +69,23 @@ def limit_content_length(max_length):
 
 @app.route('/<short_url>')
 def redirect_short_url(short_url):
-    url_manager = UrlManager()
-    long_url = url_manager.get_long_url(short_url="/" + short_url)
-
-    if long_url:
+    try:
+        url_manager = UrlManager()
+        long_url = url_manager.get_long_url(short_url="/" + short_url)
         return redirect(long_url)
-    
-    message = {
-        "error": "URL not found"
-    }
+    except Exception as e:
+        message = {
+            "error": str(e)
+        }
+        status = 400
 
-    return message, 200
+    response = app.response_class(
+        response=json.dumps(message),
+        status=status,
+        mimetype='application/json'
+    )
+
+    return response
 
 
 @lfs.route('/', methods=['POST'])
@@ -91,17 +98,24 @@ class ShortURL(Resource):
 
         short_url = body["short_url"]
 
-        url_manager = UrlManager()
-        message = url_manager.get_url(short_url=short_url)
+        try:
+            url_manager = UrlManager()
+            message = url_manager.get_url(short_url=short_url)
+            message = message.json
+            status = 200
+        except Exception as e:
+            message = {
+                "error": str(e)
+            }
+            status = 400
 
-        if message:
-            return message.json, 200
+        response = app.response_class(
+            response=json.dumps(message),
+            status=status,
+            mimetype='application/json'
+        )
 
-        message = {
-            "error": "URL not found"
-        }
-
-        return message, 200
+        return response
 
 
 @val.route('/', methods=['POST'])
@@ -116,16 +130,29 @@ class ValidateShortURL(Resource):
         short_url = body["short_url"]
         long_url = body["long_url"]
 
-        url_manager = UrlManager()
-        valid = url_manager.validate_url(short_url="/" + short_url, long_url=long_url)
+        try:
+            url_manager = UrlManager()
+            valid = url_manager.validate_url(short_url="/" + short_url, long_url=long_url)
 
-        message = {
-            'short_url': short_url,
-            'long_url': long_url,
-            'valid': valid
-        }
+            message = {
+                'short_url': short_url,
+                'long_url': long_url,
+                'valid': valid
+            }
+            status = 200
+        except Exception as e:
+            message = {
+                "error": str(e)
+            }
+            status = 400
 
-        return message, 200
+        response = app.response_class(
+            response=json.dumps(message),
+            status=status,
+            mimetype='application/json'
+        )
+
+        return response
 
 
 @sfl.route('/', methods=['POST'])
@@ -150,17 +177,24 @@ class ShortURL(Resource):
         else:
             url = Url(long_url=long_url, tag=tag, metadata=metadata)
 
-        url_manager = UrlManager()
-        message = url_manager.publish_url(url=url)
+        try:
+            url_manager = UrlManager()
+            message = url_manager.publish_url(url=url)
+            message = message.json
+            status = 200
+        except Exception as e:
+            message = {
+                "error": str(e)
+            }
+            status = 400
 
-        if message:
-            return message.json, 200
+        response = app.response_class(
+            response=json.dumps(message),
+            status=status,
+            mimetype='application/json'
+        )
 
-        message = {
-            "error": "URL not found"
-        }
-
-        return message, 200
+        return response
 
 
 @exp.route('/', methods=['POST'])
@@ -174,14 +208,20 @@ class ExploreURL(Resource):
         tag = body["tag"] if "tag" in body else None
         number = body["number"] if "number" in body else 5
 
-        url_manager = UrlManager()
-        messages = url_manager.last_urls(tag=tag, number=number)
+        try:
+            url_manager = UrlManager()
+            message = url_manager.last_urls(tag=tag, number=number)
+            status = 200
+        except Exception as e:
+            message = {
+                "error": str(e)
+            }
+            status = 400
 
-        if messages:
-            return messages, 200
+        response = app.response_class(
+            response=json.dumps(message),
+            status=status,
+            mimetype='application/json'
+        )
 
-        messages = {
-            "error": "URLs not found"
-        }
-
-        return messages, 200
+        return response

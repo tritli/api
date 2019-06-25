@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from requests.exceptions import ConnectionError
+from exceptions import URLException
 from iota import BadApiResponse, Iota, Address, Tag, ProposedTransaction, TryteString, Transaction
 from config import NODES, TAG
 from util import prepare_tag
@@ -19,7 +20,9 @@ class NodeManager(object):
     @property
     def node(self):
         # check node responsiveness
-        def node_is_responsive(node_to_check: Iota, node_uri: str):
+        def node_is_responsive(node_to_check: Iota):
+            node_uri = node_to_check.adapter.get_uri()
+
             try:
                 node_to_check.get_node_info()
             except ConnectionError as e:
@@ -32,17 +35,14 @@ class NodeManager(object):
                 print('{uri} is good to go'.format(uri=node_uri))
                 return True
 
-        selected_node = None
-
         if self.__node is None:
             for node_uri in NODES:
                 node = Iota(node_uri)
-                if node_is_responsive(node, node_uri):
+                if node_is_responsive(node):
                     self.__node = node
-                    selected_node = node_uri
-                    continue
+                    print('Selected node: {node}'.format(node=self.__node.adapter.get_uri()))
+                    break
 
-        print('Selected node: {node}'.format(node=selected_node))
         return self.__node
 
     def send_transaction(self, url):
@@ -70,12 +70,12 @@ class NodeManager(object):
             trytes = self.node.get_trytes(transaction_hashes)
 
             if "trytes" not in trytes:
-                return None
+                raise URLException(URLException.URL_NOT_FOUND)
 
             tryte_strings = trytes["trytes"]
 
             if len(tryte_strings) == 0:
-                return None
+                raise URLException(URLException.URL_NOT_FOUND)
 
             url_transactions = list()
             tries = 0
@@ -114,19 +114,15 @@ class NodeManager(object):
             transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
 
         if "hashes" not in transactions or len(transactions["hashes"]) == 0:
-            return None
+            raise URLException(URLException.URL_NOT_FOUND)
 
         url_transactions = convert_to_url_transaction(transactions["hashes"], number)
 
         if not url_transactions:
-            return None
+            raise URLException(URLException.URL_NOT_FOUND)
 
         return url_transactions
 
     def last_transactions(self, tag: str = None, number: int = 5):
         url_transactions = self.retrieve_transactions(tag=tag, number=number)
-
-        if not url_transactions:
-            return None
-
         return url_transactions

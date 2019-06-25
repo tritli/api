@@ -14,7 +14,7 @@ class IotaUrl(AbstractUrl):
         if address:
             iota_address = iota.Address(address)
             if not iota_address.with_valid_checksum():
-                raise URLException("Invalid IOTA address", URLException.INVALID_URL_FORMAT)
+                raise URLException(URLException.INVALID_URL_FORMAT)
 
         super(IotaUrl, self).__init__(address, tag, metadata)
 

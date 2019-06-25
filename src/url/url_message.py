@@ -15,10 +15,10 @@ class UrlMessage(object):
             if not isinstance(message, dict):
                 message = json.loads(message)
         except Exception as e:
-            raise URLException(e, URLException.INVALID_URL_FORMAT)
+            raise URLException(URLException.INVALID_URL_MESSAGE, message=str(e))
 
         if not message or not all(k in message for k in self.REQ_FIELDS):
-            raise URLException("Message empty or incorrect format", URLException.INVALID_URL_MESSAGE)
+            raise URLException(URLException.INVALID_URL_MESSAGE)
 
         self.__long_url = message["long_url"]
         self.__short_url = message["short_url"]
