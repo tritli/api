@@ -167,13 +167,13 @@ class ExploreURL(Resource):
         number = body["number"] if "number" in body else 5
 
         url_manager = UrlManager()
-        message = url_manager.last_urls(tag=tag, number=number)
+        messages = url_manager.last_urls(tag=tag, number=number)
 
-        if message:
-            return message.json, 200
+        if messages:
+            return messages, 200
 
-        message = {
-            "error": "URL not found"
+        messages = {
+            "error": "URLs not found"
         }
 
-        return message, 200
+        return messages, 200
