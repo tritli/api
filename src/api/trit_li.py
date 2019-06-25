@@ -70,7 +70,15 @@ def limit_content_length(max_length):
 def redirect_short_url(short_url):
     url_manager = UrlManager()
     long_url = url_manager.get_long_url(short_url="/" + short_url)
-    return redirect(long_url)
+
+    if long_url:
+        return redirect(long_url)
+    
+    message = {
+        "error": "URL not found"
+    }
+
+    return message, 200
 
 
 @lfs.route('/', methods=['POST'])
