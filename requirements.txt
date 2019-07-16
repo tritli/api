@@ -3,6 +3,7 @@ flask
 flask_limiter
 flask_restplus
 pyota
+pytest
 requests[security]
 validators
 wtforms

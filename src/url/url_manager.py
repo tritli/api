@@ -15,11 +15,12 @@ class UrlManager(object):
 
         return self.__node_manager
 
-    def publish_url(self, url):
+    def publish_url(self, url, random_check: bool = True):
 
-        while self.short_url_exists(url.short_url):
-            # could be more self explanatory to create a new short url
-            url.random_id = None
+        if random_check:
+            while self.short_url_exists(url.short_url):
+                # could be more self explanatory to create a new short url
+                url.random_id = None
 
         self.node_manager.send_transaction(url)
         return url.message

@@ -12,6 +12,7 @@ import json
 
 MAX_LENGTH_SIGNATURE_FRAGMENT = 2187
 
+
 class NodeManager(object):
     def __init__(self):
         self.__node = None
@@ -33,7 +34,7 @@ class NodeManager(object):
                 print("{uri}:{exception}".format(uri=node_uri, exception=e))
                 return False
             else:
-                print('{uri} is good to go'.format(uri=node_uri))
+                # print('{uri} is good to go'.format(uri=node_uri))
                 return True
 
         if self.__node is None:

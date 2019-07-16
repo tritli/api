@@ -2,7 +2,7 @@ import abc
 from datetime import datetime
 from url.url_message import UrlMessage
 from config import DOMAIN, TAG, ADDRESS_VERSION
-from util import get_random_id, hash_message, prepare_address, prepare_tag
+from util import get_random_id, hash_message, prepare_address, prepare_tag, prepare_address_tryte_hash
 
 
 class AbstractUrl(metaclass=abc.ABCMeta):
@@ -127,13 +127,15 @@ class AbstractUrl(metaclass=abc.ABCMeta):
 
 class UrlAddress(object):
 
-    VERSION_MAP = {
-        'T': 'test',
-        'A': 'alpha'
-    }
-
     TEST = 'T'
     ALPHA = 'A'
+    BETA = 'B'
+
+    VERSION_MAP = {
+        TEST: 'test',
+        ALPHA: 'alpha',
+        BETA: 'beta'
+    }
 
     def __init__(self, version=None, payload=None):
         self.__version = version
@@ -147,8 +149,7 @@ class UrlAddress(object):
                 pre_address = hash_message(self.__payload)
                 self.__address = self.TEST + prepare_address(pre_address)
             if self.version == self.ALPHA:
-                pre_address = hash_message(self.__payload)
-                self.__address = self.ALPHA + prepare_address(pre_address)
+                self.__address = self.ALPHA + prepare_address_tryte_hash(self.__payload)
         return self.__address
 
     @address.setter

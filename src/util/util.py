@@ -3,6 +3,8 @@ import string
 import random
 import hashlib
 import base64
+
+from iota import AsciiTrytesCodec
 from config import PASSPHRASE
 
 
@@ -13,8 +15,10 @@ def get_random_id():
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
-def hash_message(string_to_hash: str):
-    string_to_hash = string_to_hash + PASSPHRASE
+def hash_message(string_to_hash: str, with_passphrase: bool = True):
+    if with_passphrase:
+        string_to_hash = string_to_hash + PASSPHRASE
+
     h = hashlib.sha256()
     h.update(string_to_hash.encode('utf-8'))
     return h.hexdigest()
@@ -59,3 +63,19 @@ def prepare_address(hash: str):
     cleaned_string = cleaned_string.upper().ljust(address_length, '9')
 
     return cleaned_string
+
+
+def prepare_address_tryte_hash(string_to_address: str):
+    address_length = 81 - 1
+
+    h = hashlib.sha256()
+    h.update(string_to_address.encode('utf-8'))
+    hash_bytes = h.digest()
+
+    codec = AsciiTrytesCodec()
+    hash_trytes = codec.encode(input=hash_bytes, errors="strict")[0]
+
+    hash_trytes_string = hash_trytes.decode("utf-8")
+    hash_trytes_string = hash_trytes_string.upper().ljust(address_length, '9')
+
+    return hash_trytes_string
