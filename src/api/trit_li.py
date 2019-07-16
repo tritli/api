@@ -1,20 +1,31 @@
 import json
 from functools import wraps
-from flask import Flask, request, redirect, abort, jsonify
+from flask import Flask, request, redirect, abort
 from exceptions import URLException
 from flask_restplus import Api, Resource, fields
+from flask_httpauth import HTTPBasicAuth
 from url import UrlManager, Url, IotaUrl, DocumentUrl
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from api.auth import check_api_user
 
 app = Flask(__name__)
 api = Api(app=app)
+auth = HTTPBasicAuth()
 
 limiter = Limiter(
     app,
     key_func=get_remote_address
     # default_limits=["100 per day", "10 per hour", "1 per minute"]
 )
+
+
+@auth.verify_password
+def verify(user_name, password):
+    if not (user_name and password):
+        return False
+    return check_api_user(user_name=user_name, password=password)
+
 
 lfs = api.namespace('lfs', description='Get long URL from short URL')
 sfl = api.namespace('sfl', description='Get short URL from long URL')
@@ -50,8 +61,9 @@ validation_body = api.model(
 explore_body = api.model(
     'Last URLs',
     {
-        'tag': fields.String(required=False, description='Find tag', example="TRITLI999999999999999999999"),
-        'number': fields.Integer(required=False, description='Number of last URLs', example=5)
+        'tag': fields.String(required=False, description='Search for tag', example="TRITLI999999999999999999999"),
+        'number': fields.Integer(required=False, description='Maximum number of last URLs', example=5),
+        'valid_only': fields.Boolean(required=False, description='Retrieve only trit.li validated last URLs', example=False)
     }
 )
 
@@ -180,14 +192,16 @@ class ExploreURL(Resource):
 
     @api.expect(explore_body, validate=True)
     @api.response(200, 'Last # URLs loaded')
+    @auth.login_required
     def post(self):
         body = request.get_json()
 
         tag = body["tag"] if "tag" in body else None
         number = body["number"] if "number" in body else 5
+        valid_only = body["valid_only"] if "valid_only" in body else None
 
         url_manager = UrlManager()
-        message = url_manager.last_urls(tag=tag, number=number)
+        message = url_manager.last_urls(tag=tag, number=number, valid_only=valid_only)
         status = 200
 
         response = app.response_class(

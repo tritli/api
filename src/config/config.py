@@ -5,3 +5,6 @@ DOMAIN = "{}{}".format("http://", "trit.li/")
 PASSPHRASE = "TRITLI"
 TAG = "TRITLI"
 ADDRESS_VERSION = "A"  # T = test, A = alpha
+
+API_USER = "admin@trit.li"
+API_PASS = "tritli"
