@@ -85,7 +85,7 @@ class UrlManager(object):
         if not message:
             return None
 
-    def last_urls(self, tag: str = None, number: int = 5):
+    def last_urls(self, tag: str = None, number: int = 5, valid_only: bool = True):
         url_transactions = self.node_manager.last_transactions(tag=tag, number=number)
 
         if not url_transactions:
@@ -94,7 +94,9 @@ class UrlManager(object):
         valid_messages = list()
 
         for url in url_transactions:
-            if url.is_valid:
+            if valid_only and url.is_valid:
+                valid_messages.append(url.message.json)
+            elif not valid_only:
                 valid_messages.append(url.message.json)
 
         if not valid_messages or len(valid_messages) == 0:

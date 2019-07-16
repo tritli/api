@@ -69,8 +69,16 @@ class NodeManager(object):
 
         MAX_TRIES = 20
 
-        def convert_trytes_to_string(tryte_string):
-            transaction_to_decode = Transaction.from_tryte_string(tryte_string)
+        def convert_trytes_to_transaction(tryte_string):
+            try:
+                transaction = Transaction.from_tryte_string(tryte_string)
+            except Exception as e:
+                print("Transaction could not be converted: {error}".format(error=e))
+                return None
+
+            return transaction
+
+        def convert_transaction_to_url(transaction_to_decode: Transaction):
             tag = transaction_to_decode.tag
             message_string = transaction_to_decode.signature_message_fragment.decode()
             return tag, UrlMessage(message_string)
@@ -89,9 +97,12 @@ class NodeManager(object):
             url_transactions = list()
             tries = 0
 
-            for tryte_string in tryte_strings:
+            tryte_transactions = [convert_trytes_to_transaction(tryte_string) for tryte_string in tryte_strings]
+            tryte_transactions = sorted(tryte_transactions, key=lambda k: k.timestamp, reverse=True)
+
+            for tryte_transaction in tryte_transactions:
                 try:
-                    tag, message = convert_trytes_to_string(tryte_string)
+                    tag, message = convert_transaction_to_url(tryte_transaction)
 
                     if message.type == IOTA:
                         url = IotaUrl()
