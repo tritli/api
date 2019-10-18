@@ -9,14 +9,14 @@ class IotaUrl(AbstractUrl):
 
     TYPE = IOTA
 
-    def __init__(self, address: str = None, tag: str = None, metadata: str = None):
+    def __init__(self, address: str = None, tag: str = None, metadata: str = None, custom_salt: str = None):
 
         if address:
             iota_address = iota.Address(address)
             if not iota_address.with_valid_checksum():
                 raise URLException(URLException.INVALID_URL_FORMAT)
 
-        super(IotaUrl, self).__init__(address, tag, metadata)
+        super(IotaUrl, self).__init__(address, tag, metadata, custom_salt)
 
     @property
     def iota_address(self):

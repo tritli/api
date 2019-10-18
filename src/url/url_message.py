@@ -10,7 +10,7 @@ class UrlMessage(object):
     ALL_FIELDS = ["long_url", "short_url", "tag", "type", "metadata", "timestamp", "hash"]
     REQ_FIELDS = ["long_url", "short_url", "type", "metadata", "timestamp"]
 
-    def __init__(self, message):
+    def __init__(self, message, custom_salt: str = None):
         try:
             if not isinstance(message, dict):
                 message = json.loads(message)
@@ -22,6 +22,7 @@ class UrlMessage(object):
 
         self.__long_url = message["long_url"]
         self.__short_url = message["short_url"]
+        self.__custom_salt = custom_salt
         self.__tag = message["tag"] if "tag" in message else prepare_tag(TAG)
         self.__type = message["type"]
         self.__metadata = message["metadata"]
@@ -43,6 +44,14 @@ class UrlMessage(object):
     @property
     def short_url(self):
         return self.__short_url
+
+    @property
+    def custom_salt(self):
+        return self.__custom_salt
+
+    @custom_salt.setter
+    def custom_salt(self, custom_salt):
+        self.__custom_salt = custom_salt
 
     @property
     def type(self):
@@ -69,7 +78,8 @@ class UrlMessage(object):
             "type": self.type,
             "metadata": self.metadata,
             "timestamp": self.timestamp,
-            "hash": self.hash
+            "hash": self.hash,
+            "is_valid": self.is_valid
         }
 
     @property
@@ -84,7 +94,7 @@ class UrlMessage(object):
                 "timestamp": self.timestamp,
             }
 
-            self.__hash = hash_message(json.dumps(message))
+            self.__hash = hash_message(json.dumps(message), custom_salt=self.custom_salt)
         return self.__hash
 
     @hash.setter
@@ -102,6 +112,6 @@ class UrlMessage(object):
             "timestamp": self.timestamp,
         }
 
-        fresh_hash = hash_message(json.dumps(message))
+        fresh_hash = hash_message(json.dumps(message), custom_salt=self.custom_salt)
 
         return self.hash == fresh_hash

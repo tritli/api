@@ -8,12 +8,13 @@ from util import get_random_id, hash_message, prepare_address, prepare_tag, prep
 class AbstractUrl(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def __init__(self, long_url: str = None, tag: str = None, metadata: str = None):
+    def __init__(self, long_url: str = None, tag: str = None, metadata: str = None, custom_salt: str = None):
         self.__random_id = None
         self.__short_url = None
         self.__tag = tag
         self.__address = None
         self.__long_url = long_url
+        self.__custom_salt = custom_salt
         self._type = None
         self.__metadata = metadata
         self.__timestamp = None
@@ -77,6 +78,14 @@ class AbstractUrl(metaclass=abc.ABCMeta):
         self.__long_url = long_url
 
     @property
+    def custom_salt(self):
+        return self.__custom_salt
+
+    @custom_salt.setter
+    def custom_salt(self, custom_salt):
+        self.__custom_salt = custom_salt
+
+    @property
     @abc.abstractmethod
     def type(self):
         pass
@@ -108,12 +117,13 @@ class AbstractUrl(metaclass=abc.ABCMeta):
                 "timestamp": self.timestamp
             }
 
-            self.__message = UrlMessage(message)
+            self.__message = UrlMessage(message, self.custom_salt)
 
         return self.__message
 
     def from_message(self, message: UrlMessage):
         self.__message = message
+        self.__message.custom_salt = self.__custom_salt
         self.random_id = self.__message.random_id
         self.long_url = self.__message.long_url
         self._type = self.__message.type

@@ -25,7 +25,7 @@ class UrlManager(object):
         self.node_manager.send_transaction(url)
         return url.message
 
-    def validate_url(self, short_url: str, long_url: str):
+    def validate_url(self, short_url: str, long_url: str, custom_salt: str = None):
         random_id = short_url.split("/")[-1]
 
         url = Url()
@@ -36,9 +36,11 @@ class UrlManager(object):
         if not url_transactions:
             return False
 
-        for url in url_transactions:
-            if url.long_url == long_url:
-                if url.is_valid:
+        for url_transaction in url_transactions:
+            url_to_validate = Url(custom_salt=custom_salt)
+            url_to_validate.from_message(url_transaction.message)
+            if url_to_validate.long_url == long_url:
+                if url_to_validate.is_valid:
                     return True
 
         return False
@@ -65,22 +67,21 @@ class UrlManager(object):
         if not url_transactions:
             return None
 
-        valid_message = None
+        message = dict()
 
         for url in url_transactions:
             if url.is_valid:
-                valid_message = url.message
+                message = url.message
+            else:
+                message = url.message
 
-        if not valid_message:
-            return None
-
-        return valid_message
+        return message
 
     def get_long_url(self, short_url: str):
         message = self.get_url(short_url=short_url)
 
         if message:
-            return message.json["long_url"], 200
+            return message.json["long_url"]
 
         if not message:
             return None
