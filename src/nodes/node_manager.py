@@ -47,6 +47,18 @@ class NodeManager(object):
 
         return self.__node
 
+    def find_transactions(self, address: str = None, tag: str = None):
+        if address:
+            transactions = self.node.find_transactions(addresses=[Address(address)])
+        elif tag:
+            identifier_tag = prepare_tag(tag).encode("utf-8")
+            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
+        else:
+            identifier_tag = prepare_tag(TAG).encode("utf-8")
+            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
+
+        return transactions
+
     def send_transaction(self, url):
         address = Address(url.address)
         tag = Tag(url.tag.encode("utf-8"))
@@ -65,7 +77,7 @@ class NodeManager(object):
                                 transfers=[proposed_transaction]
                                 )
 
-    def retrieve_transactions(self, address: str = None, tag: str = None, number: int = None):
+    def retrieve_transactions(self, address: str = None, tag: str = None, number_of_tries: int = None, number_of_transactions: int = None):
 
         MAX_TRIES = 20
 
@@ -83,7 +95,10 @@ class NodeManager(object):
             message_string = transaction_to_decode.signature_message_fragment.decode()
             return tag, UrlMessage(message_string)
 
-        def convert_to_url_transaction(transaction_hashes, number: int = None):
+        def convert_to_url_transaction(transaction_hashes, number_of_tries: int = MAX_TRIES, number_of_transactions: int = None):
+            if number_of_transactions:
+                number_of_tries = number_of_transactions
+
             trytes = self.node.get_trytes(transaction_hashes)
 
             if "trytes" not in trytes:
@@ -114,7 +129,7 @@ class NodeManager(object):
                     url.from_message(message)
                     url_transactions.append(url)
 
-                    if (number and len(url_transactions) == number) or tries == MAX_TRIES:
+                    if len(url_transactions) == number_of_tries:
                         return url_transactions
 
                 except Exception as e:
@@ -124,19 +139,12 @@ class NodeManager(object):
 
             return url_transactions
 
-        if address:
-            transactions = self.node.find_transactions(addresses=[Address(address)])
-        elif tag:
-            identifier_tag = prepare_tag(tag).encode("utf-8")
-            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
-        else:
-            identifier_tag = prepare_tag(TAG).encode("utf-8")
-            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
+        transactions = self.find_transactions(address, tag)
 
         if "hashes" not in transactions or len(transactions["hashes"]) == 0:
             raise URLException(URLException.URL_NOT_FOUND)
 
-        url_transactions = convert_to_url_transaction(transactions["hashes"], number)
+        url_transactions = convert_to_url_transaction(transactions["hashes"], number_of_tries, number_of_transactions)
 
         if not url_transactions:
             raise URLException(URLException.URL_NOT_FOUND)
@@ -144,14 +152,7 @@ class NodeManager(object):
         return url_transactions
 
     def transaction_exits(self, address: str = None, tag: str = None):
-        if address:
-            transactions = self.node.find_transactions(addresses=[Address(address)])
-        elif tag:
-            identifier_tag = prepare_tag(tag).encode("utf-8")
-            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
-        else:
-            identifier_tag = prepare_tag(TAG).encode("utf-8")
-            transactions = self.node.find_transactions(tags=[Tag(identifier_tag)])
+        transactions = self.find_transactions(address, tag)
 
         if "hashes" not in transactions or len(transactions["hashes"]) == 0:
             return False
@@ -159,5 +160,5 @@ class NodeManager(object):
         return True
 
     def last_transactions(self, tag: str = None, number: int = 5):
-        url_transactions = self.retrieve_transactions(tag=tag, number=number)
+        url_transactions = self.retrieve_transactions(tag=tag, number_of_transactions=number)
         return url_transactions
