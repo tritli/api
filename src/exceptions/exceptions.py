@@ -46,8 +46,14 @@ class URLException(Exception):
         return self.message
 
     def get_response(self):
-        ret = {
-            "errors": self.status_code,
-            "message": self.message
+        success = False
+        response = {
+            'success': success,
+            'error': {
+                'type': "URLException",
+                'code': self.status_code,
+                'message': self.message
+            }
         }
-        return jsonify(ret), self.API_STATUS_CODE
+
+        return jsonify(response), self.API_STATUS_CODE
