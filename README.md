@@ -26,7 +26,7 @@ More specific, the trit.li API has the following basic functions:
 
 
 # 3. How does it work?
-### 3.1 Short URL from Long URL
+## 3.1 Short URL from Long URL
 The API retrieves the http request with the long URL to be shortened.
 A random string is generated (length and the characters can be defined in the config).
 By default the random string consists of A-Z a-z 0-9 and - to a length of 7 characters.
@@ -43,7 +43,7 @@ The transaction contains the following information:
 
 ![storing the URL on the tangle][sfl]
 
-### 3.2 Long URL from Short URL
+## 3.2 Long URL from Short URL
 It is basically the same with less steps. The API retrieves the http request with the short URL (the random string).
 The random string is converted to an IOTA compatible address.
 All transactions to that address are retrieved and validated with the default or custom salt. 
@@ -59,7 +59,8 @@ Is the default salt is used, the validation can only be executed through the off
 However, if a custom salt was used, when requesting a short URL, this specific salt will be required for the validation.
 
 
-# 5. Run in Python 3
+# 5. Run the API
+## In Python 3
 For production purposes it is recommended to use an appropriate wsgi web server.
 The current state of the project is not production ready anyways.
 To start the API using python, follow the following steps.
@@ -73,8 +74,7 @@ To start the API using python, follow the following steps.
 4. Run with the following command
     > `python3 wsgi.py`
 
-
-# 6. Run in docker
+## In Docker
 As mentioned before the current state of the project is not production ready.
 The docker image uses nginx and uwsgi as web server and supervisor as process manager. 
 The config files can be found under the `./docker` directory.
@@ -83,6 +83,16 @@ The config files can be found under the `./docker` directory.
     > `docker build -t tritliapi .`
 2. Run the container
     > `docker run -it --cpuset-cpus="0-3" -p 80:80 tritliapi`
+
+
+# Your Support
+1. [Give feedback or participate](mailto:feedback@trit.li)
+2. Feel free to donate iota to the following IOTA address
+    > JYHJOCIFXWGWCAWYAHHPOPCELIGDTGSCLVRAQRZJY9BUTIGVLXACEBOLMPRRMNLZDMIBLPETDWJVZASEXJJUPTVJMC
+3. Use the API to donate (API running under localhost/docker and deep links need to be activated in your trinity wallet). 
+   * click on [donate](http://localhost/donate)
+   * no automated payment, still needs to be confirmed in the wallet
+
 
 [logo]: docs/images/logo.png "Trit.li Logo"
 [sfl]: docs/images/api_sfl.png "Retrieving the short URL to a long URL - Storing the URL on the tangle"
