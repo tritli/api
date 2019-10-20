@@ -12,7 +12,7 @@ from url import UrlManager, Url, IotaUrl, DocumentUrl
 from util import get_key
 
 app = Flask(__name__)
-api = Api(app=app)
+api = Api(app=app, title='Trit.li API', version='0.1', contact='Trit.li', contact_email='info@trit.li')
 auth = HTTPBasicAuth()
 # you can use the decorator @auth.login_required to require authentication first --> see config
 
@@ -75,6 +75,10 @@ explore_body = api.model(
 
 
 def limit_content_length(max_length):
+    """Decorator, which can be used to check the maximum request length
+    :param int max_length: maximum length
+    """
+
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
