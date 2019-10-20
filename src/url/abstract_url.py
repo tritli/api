@@ -3,9 +3,19 @@ from datetime import datetime
 from url.url_message import UrlMessage
 from config import DOMAIN, TAG, ADDRESS_VERSION
 from util import get_random_id, hash_message, prepare_address, prepare_tag, prepare_address_tryte_hash
+from exceptions import URLException
 
 
 class AbstractUrl(metaclass=abc.ABCMeta):
+    """
+    Defines the data structure an URL object can have.
+    This class only implements the "core" methods other URL types use.
+
+    The different types are:
+        - a standard URL using a shortened URL
+        - an IOTA address itself for deep links to a wallet using a shortened URL
+        - an document or better, its hash for storing document hashes on the tangle using shortened URLs
+    """
 
     @abc.abstractmethod
     def __init__(self, long_url: str = None, tag: str = None, metadata: str = None, custom_salt: str = None):
@@ -35,7 +45,7 @@ class AbstractUrl(metaclass=abc.ABCMeta):
     @property
     def short_url(self):
         if self.__short_url is None:
-            self.__short_url = DOMAIN + "{}".format(self.random_id)
+            self.__short_url = "{}".format(self.random_id)
 
         return self.__short_url
 
@@ -136,6 +146,19 @@ class AbstractUrl(metaclass=abc.ABCMeta):
 
 
 class UrlAddress(object):
+    """
+    Defines the structure of an URL address
+    An address can have different versions, which defines how the address is retrieved
+
+    Current versions are:
+        - T for Test:
+            - sha256 hash of the random string using salt from config or custom salt
+            - base64 encoding
+            - clean string (replacing numbers, uppercase and adapting length)
+        - A for Alpha:
+            - sha256 hash of the random string using salt from config or custom salt
+            - direct conversion into trytes using the pyote library and then length adaption
+    """
 
     TEST = 'T'
     ALPHA = 'A'
@@ -147,13 +170,23 @@ class UrlAddress(object):
         BETA: 'beta'
     }
 
-    def __init__(self, version=None, payload=None):
+    def __init__(self, version: str = None, payload: str = None):
+        """
+        :param version:
+            Version of the URL address
+        :param payload:
+            String to use as the actual address
+        """
         self.__version = version
         self.__payload = payload
         self.__address = None
 
     @property
     def address(self):
+        # type: () -> str
+        """
+        Returns the calculated IOTA compatible address based on the defined version
+        """
         if not self.__address:
             if self.version == self.TEST:
                 pre_address = hash_message(self.__payload)
@@ -164,11 +197,22 @@ class UrlAddress(object):
 
     @address.setter
     def address(self, address):
+        """
+        sets the address string
+        """
         self.__address = address
 
     @property
     def version(self):
+        # type: () -> str
+        """
+        Returns the version of an URL address based on the first character in the address
+        """
         if not self.__version:
-            self.__version = self.VERSION_MAP[self.address[0]]
+            if self.address[0] in self.VERSION_MAP.keys():
+                self.__version = self.VERSION_MAP[self.address[0]]
+            else:
+                raise URLException(URLException.INVALID_URL_ADDRESS)
 
         return self.__version
+

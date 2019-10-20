@@ -6,6 +6,10 @@ from util import prepare_tag
 
 
 class UrlMessage(object):
+    """
+    Defines the data structure, which will be written onto the tangle as a signature message.
+    The class itself provides the validation check re-calculating the hash stored on the tangle as well.
+    """
 
     ALL_FIELDS = ["long_url", "short_url", "tag", "type", "metadata", "timestamp", "hash"]
     REQ_FIELDS = ["long_url", "short_url", "type", "metadata", "timestamp"]

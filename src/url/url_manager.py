@@ -80,10 +80,14 @@ class UrlManager(object):
     def get_long_url(self, short_url: str):
         message = self.get_url(short_url=short_url)
 
-        if message:
-            return message.json["long_url"]
+        if message and message.is_valid:
+            if message.type == 'iota':
+                iota_address = message.json["long_url"]
+                deep_link = "{}{}{}".format("iota://", iota_address, "/?message=donation")
+                return deep_link
 
-        if not message:
+            return message.json["long_url"]
+        else:
             return None
 
     def last_urls(self, tag: str = None, number: int = 5, valid_only: bool = True):
