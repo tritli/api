@@ -1,4 +1,4 @@
-# Introduction
+# 1. Introduction
 Trit.li is a distributed URL shortener service using the IOTA tangle.
 It addresses the following main weaknesses of a classical, centralized URL shortener:
 * Censorship and possible deactivation of links
@@ -10,7 +10,7 @@ The name trit.li is derived from two facts:
 * Trit.li is based on IOTA, which uses the trinary not the binary system (trit vs. bit)
 
 
-# API - The backend
+# 2. API - The backend
 The trit.li API generates a random short URL and stores it with the 
 respective long URL and optional meta data on the tangle. 
 Through the API, the long URL can be retrieved from the generated short URL.
@@ -23,15 +23,12 @@ More specific, the trit.li API has the following basic functions:
 5. Exploration of the last requested short URLs using the default tag 
 
 
-# How does it work?
-## Short URL from Long URL
+# 3. How does it work?
+### 3.1 Short URL from Long URL
 The API retrieves the http request with the long URL to be shortened.
-
 A random string is generated (length and the characters can be defined in the config).
 By default the random string consists of A-Z a-z 0-9 and - to a length of 7 characters.
-
 The random string is converted to an IOTA compatible address.
-
 After the check if that address exists, a transaction is send to the generated address.
 
 The transaction contains the following information:
@@ -44,31 +41,28 @@ The transaction contains the following information:
 
 ![storing the URL on the tangle][sfl]
 
-## Long URL from Short URL
+### 3.2 Long URL from Short URL
 It is basically the same with less steps. The API retrieves the http request with the short URL (the random string).
-
 The random string is converted to an IOTA compatible address.
-
-All transactions to that address are retrieved and validated with the default or custom salt.
-
+All transactions to that address are retrieved and validated with the default or custom salt. 
 If a transaction turns out to be valid the long URL will be returned from the tangle.
 
 ![receiving the URL from the tangle][lfs]
 
 
-# Validation
+# 4. Validation
 For validation purposes, by default an sha256 hash is generated over the entire signature message (JSON object) including a salt.
 If not specified, a default salt is used by trit.li (can be defined in the config file).
 Is the default salt is used, the validation can only be executed through the official trit.li API. 
 However, if a custom salt was used, when requesting a short URL, this specific salt will be required for the validation.
 
 
-# Run in python 3
+# 5. Run in Python 3
 For production purposes it is recommended to use an appropriate wsgi web server.
 The current state of the project is not production ready anyways.
 To start the API using python, follow the following steps.
 
-1. change to the `./src` directory as the working directory
+1. change to the `./src` directory
     > `cd ./src`
 2. Install requirements (best is to use a python virtual environment)
     > `pip3 install -r requirements.txt`
@@ -78,7 +72,7 @@ To start the API using python, follow the following steps.
     > `python3 wsgi.py`
 
 
-# Run in docker
+# 6. Run in docker
 As mentioned before the current state of the project is not production ready.
 The docker image uses nginx and uwsgi as web server and supervisor as process manager. 
 The config files can be found under the `./docker` directory.
