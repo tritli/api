@@ -1,3 +1,5 @@
+![amazing trit.li banner](docs/images/logo.png?style=centerme)
+
 # 1. Introduction
 Trit.li is a distributed URL shortener service using the IOTA tangle.
 It addresses the following main weaknesses of a classical, centralized URL shortener:
@@ -82,5 +84,6 @@ The config files can be found under the `./docker` directory.
 2. Run the container
     > `docker run -it --cpuset-cpus="0-3" -p 80:80 tritliapi`
 
-[sfl]: docs/images/20190723_api_sfl.png "Retrieving the short URL to a long URL - Storing the URL on the tangle"
-[lfs]: docs/images/20190723_api_lfs.png "Retrieving the long URL to a short URL - Retrieving the URL from the tangle"
+[logo]: docs/images/logo.png "Trit.li Logo"
+[sfl]: docs/images/api_sfl.png "Retrieving the short URL to a long URL - Storing the URL on the tangle"
+[lfs]: docs/images/api_lfs.png "Retrieving the long URL to a short URL - Retrieving the URL from the tangle"
