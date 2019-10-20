@@ -15,6 +15,7 @@ class URLException(Exception):
     INVALID_URL_FORMAT = '-1000'
     INVALID_URL_TYPE = '-1500'
     INVALID_URL_MESSAGE = '-2000'
+    INVALID_URL_ADDRESS = '-2500'
     CONVERT_ERROR = '-3000'
     MAX_LENGTH = '-4000'
 
@@ -23,6 +24,7 @@ class URLException(Exception):
         INVALID_URL_FORMAT: "Could not validate URL format",
         INVALID_URL_TYPE: "Invalid URL type",
         INVALID_URL_MESSAGE: "Message empty or incorrect format",
+        INVALID_URL_ADDRESS: "Invalid URL Address, please check version",
         CONVERT_ERROR: "Can not convert message from tangle into URL message",
         MAX_LENGTH: "Maximum length of 2187 trytes reached, reduce long_url and/or metadata",
     }
