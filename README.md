@@ -1,3 +1,5 @@
+[![stability][0]][1] [![Python 3.7][2]][3] [![PyOTA 2.1.0][4]][5] [![build docker][6]][7] 
+
 ![amazing trit.li banner](docs/images/logo.png?style=centerme)
 
 # 1. Introduction
@@ -96,6 +98,14 @@ The config files can be found under the `./docker` directory.
    * click on [donate]
    * this is no automated payment, it still needs to be confirmed in the wallet
 
+[0]: https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square
+[1]: https://nodejs.org/api/documentation.html#documentation_stability_index
+[2]: https://img.shields.io/badge/python-3.7-blue.svg?style=flat-square
+[3]: https://www.python.org/downloads/release/python-370
+[4]: https://img.shields.io/badge/PyOTA-2.1.0-blue.svg?style=flat-square
+[5]: https://pyota.readthedocs.io/en/latest/
+[6]: https://img.shields.io/badge/build-docker-green.svg?style=flat-square
+[7]: https://www.docker.com/
 
 [logo]: docs/images/logo.png "Trit.li Logo"
 [swagger]: https://editor.swagger.io/ "Swagger Online Editor"
