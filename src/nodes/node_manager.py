@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, \
 from requests.exceptions import ConnectionError
 from exceptions import URLException
 from iota import BadApiResponse, Iota, Address, Tag, ProposedTransaction, TryteString, Transaction
-from config import NODES, TAG
+from config import NODES, LOCAL_POW, TAG
 from util import prepare_tag
 from url.url_types import IOTA, DOC
 from url import Url, IotaUrl, DocumentUrl
@@ -39,7 +39,7 @@ class NodeManager(object):
 
         if self.__node is None:
             for node_uri in NODES:
-                node = Iota(node_uri)
+                node = Iota(node_uri, local_pow=LOCAL_POW)
                 if node_is_responsive(node):
                     self.__node = node
                     print('Selected node: {node}'.format(node=self.__node.adapter.get_uri()))

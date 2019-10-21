@@ -3,6 +3,10 @@ import string
 # some sample nodes
 NODES = ["https://nodes.thetangle.org:443", "http://node05.iotatoken.nl:16265"]
 
+# NOT YET SUPPORTED - DO NOT USE
+# activate local pow to validate transactions on your device
+LOCAL_POW = False
+
 # this is the domain used for creating the short URL
 DOMAIN = "{}{}".format("http://", "localhost/")
 
