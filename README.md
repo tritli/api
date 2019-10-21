@@ -1,4 +1,4 @@
-[![stability][0]][1] [![Python 3.7][2]][3] [![PyOTA 2.1.0][4]][5] [![build docker][6]][7] 
+[![stability][0]][1] [![Python 3.6][2]][3] [![PyOTA 2.1.0][4]][5] [![build docker][6]][7] 
 
 ![amazing trit.li banner](docs/images/logo.png?style=centerme)
 
@@ -100,8 +100,8 @@ The config files can be found under the `./docker` directory.
 
 [0]: https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square
 [1]: https://nodejs.org/api/documentation.html#documentation_stability_index
-[2]: https://img.shields.io/badge/python-3.7-blue.svg?style=flat-square
-[3]: https://www.python.org/downloads/release/python-370
+[2]: https://img.shields.io/badge/python-3.6-blue.svg?style=flat-square
+[3]: https://www.python.org/downloads/release/python-360
 [4]: https://img.shields.io/badge/PyOTA-2.1.0-blue.svg?style=flat-square
 [5]: https://pyota.readthedocs.io/en/latest/
 [6]: https://img.shields.io/badge/build-docker-green.svg?style=flat-square
