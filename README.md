@@ -86,8 +86,8 @@ The config files can be found under the `./docker` directory.
 
 1. Build a local docker container 
     > `docker build -t tritliapi .`
-2. Run the container
-    > `docker run -it --cpuset-cpus="0-3" -p 80:80 tritliapi`
+2. Run the container (you can assign more cores using --cpuset-cpus="0-n")
+    > `docker run -it -p 80:80 tritliapi`
 
 
 # Your Support
