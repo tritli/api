@@ -24,6 +24,9 @@ More specific, the trit.li API has the following basic functions:
 4. Validation of the combination of short and long URL
 5. Exploration of the last requested short URLs using the default tag 
 
+The API uses flask/flask-restplus, which comes with swagger support. 
+You can use the [swagger online editor][swagger] to generate an API client in your favorite programming language.
+
 
 # 3. How does it work?
 ## 3.1 Short URL from Long URL
@@ -86,14 +89,18 @@ The config files can be found under the `./docker` directory.
 
 
 # Your Support
-1. [Give feedback or participate](mailto:feedback@trit.li)
+1. Give [feedback] or [participate]
 2. Feel free to donate iota to the following IOTA address
     > JYHJOCIFXWGWCAWYAHHPOPCELIGDTGSCLVRAQRZJY9BUTIGVLXACEBOLMPRRMNLZDMIBLPETDWJVZASEXJJUPTVJMC
 3. Use the API to donate (API running under localhost/docker and deep links need to be activated in your trinity wallet). 
-   * click on [donate](http://localhost/donate)
-   * no automated payment, still needs to be confirmed in the wallet
+   * click on [donate]
+   * this is no automated payment, it still needs to be confirmed in the wallet
 
 
 [logo]: docs/images/logo.png "Trit.li Logo"
+[swagger]: https://editor.swagger.io/ "Swagger Online Editor"
 [sfl]: docs/images/api_sfl.png "Retrieving the short URL to a long URL - Storing the URL on the tangle"
 [lfs]: docs/images/api_lfs.png "Retrieving the long URL to a short URL - Retrieving the URL from the tangle"
+[feedback]: mailto:feedback@trit.li
+[participate]: mailto:admin@trit.li
+[donate]: http://localhost/donate
