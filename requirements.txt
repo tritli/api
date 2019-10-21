@@ -3,7 +3,7 @@ flask==1.0.3
 flask_httpauth==3.3.0
 flask_limiter==1.0.1
 flask_restplus==0.12.1
-pyota-pow==2.1.0
+pyota-pow==1.0.2
 pytest
 requests[security]==2.22.0
 validators==0.13.0
