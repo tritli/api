@@ -1,4 +1,4 @@
-[![stability][0]][1] [![Python 3.6][2]][3] [![PyOTA 2.1.0][4]][5] [![build docker][6]][7] 
+[![stability][0]][1] [![Python 3.6][2]][3] [![PyOTA 2.1.0][4]][5] [![build docker][6]][7] [![license][8]][9] 
 
 ![amazing trit.li banner](docs/images/logo.png?style=centerme)
 
@@ -106,6 +106,8 @@ The config files can be found under the `./docker` directory.
 [5]: https://pyota.readthedocs.io/en/latest/
 [6]: https://img.shields.io/badge/build-docker-green.svg?style=flat-square
 [7]: https://www.docker.com/
+[8]: https://img.shields.io/badge/license-GPL3-green.svg?style=flat-square
+[9]: https://www.gnu.org/licenses/gpl-3.0.html
 
 [logo]: docs/images/logo.png "Trit.li Logo"
 [swagger]: https://editor.swagger.io/ "Swagger Online Editor"
