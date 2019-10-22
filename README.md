@@ -106,8 +106,8 @@ The config files can be found under the `./docker` directory.
 [5]: https://pyota.readthedocs.io/en/latest/
 [6]: https://img.shields.io/badge/build-docker-green.svg?style=flat-square
 [7]: https://www.docker.com/
-[8]: https://img.shields.io/badge/license-GPL3-green.svg?style=flat-square
-[9]: https://www.gnu.org/licenses/gpl-3.0.html
+[8]: https://img.shields.io/badge/license-MIT-green.svg?style=flat-square
+[9]: https://opensource.org/licenses/MIT
 
 [logo]: docs/images/logo.png "Trit.li Logo"
 [swagger]: https://editor.swagger.io/ "Swagger Online Editor"
