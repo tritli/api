@@ -1,4 +1,4 @@
-cryptography==2.7
+cryptography==3.2
 flask==1.0.3
 flask_httpauth==3.3.0
 flask_limiter==1.0.1
